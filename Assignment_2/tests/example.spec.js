@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('DEMOQA Form Automation', () => {
-  test('should validate error on email field', async ({ page }) => {
+  test('should validate error on invalid email and then verify form submission with valid email', async ({ page }) => {
     // Step 1: Launch the website
     await page.goto('https://demoqa.com/');
 
@@ -14,7 +14,7 @@ test.describe('DEMOQA Form Automation', () => {
     // Step 4: Click on the "Text Box" option from the menu
     await page.click('text="Text Box"');
 
-    // Step 5: Fill out the form with the required details
+    // Step 5: Fill out the form with invalid email first to check for error validation
     await page.fill('#userName', 'Your Name');
     await page.fill('#userEmail', 'Test email'); // Invalid email
     await page.fill('#currentAddress', '123 Sample Current Address');
@@ -24,15 +24,37 @@ test.describe('DEMOQA Form Automation', () => {
     await page.click('#submit');
 
     // Step 7: Validate that an error is displayed for the invalid email
-    // Since the page doesn't have a classic error message, we'll validate that 
-    // the form field does not accept the invalid email and contains the default HTML5 invalid message.
     const emailField = await page.locator('#userEmail');
     const validationMessage = await emailField.evaluate((node) => node.validationMessage);
     
-    // Step 8: Assertion to check if the invalid email error is displayed
     expect(validationMessage).toContain('Please include an \'@\' in the email address.');
 
-    // Optional: Screenshot for visual confirmation of the error
-    await page.screenshot({ path: 'email-error-screenshot.png' });
+    // Step 8: Now, correct the email with a valid one and resubmit the form
+    await page.fill('#userEmail', 'validemail@example.com'); // Valid email
+    await page.click('#submit'); // Submit again
+
+    // Step 9: Validate that the entered values are correctly displayed in the output section
+
+    // Validate Name
+    const outputName = await page.locator('#output #name').innerText();
+    expect(outputName).toContain('Your Name');
+
+    // Validate Email
+    const outputEmail = await page.locator('#output #email').innerText();
+    expect(outputEmail).toContain('validemail@example.com');
+
+    // Validate Current Address
+    const outputCurrentAddress = await page.locator('#output #currentAddress').innerText();
+    expect(outputCurrentAddress).toContain('123 Sample Current Address');
+
+    // Validate Permanent Address
+    const outputPermanentAddress = await page.locator('#output #permanentAddress').innerText();
+    expect(outputPermanentAddress).toContain('456 Sample Permanent Address');
+
+    // Optional: Screenshot for visual confirmation
+    await page.screenshot({ path: 'form-submission-success.png' });
+
+    // Print a confirmation to the console
+    console.log('Form submitted successfully and values are displayed correctly.');
   });
 });
