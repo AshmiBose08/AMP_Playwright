@@ -77,15 +77,16 @@ test.describe('Demoblaze Automation Tests', () => {
     await page.goto('https://demoblaze.com/');
 
     // Verify products are displayed
+    const productCards = page.locator('.card-title a');
     const productCount = await productCards.count();
-    expect(productCount).toBeGreaterThan(1);
+    expect(productCount).toBeGreaterThan(0);
 
     // Click on a category (Phones)
     await page.click('a:has-text("Phones")');
 
     // Verify category navigation
     const categoryProducts = page.locator('.card-title a');
-    await expect(categoryProducts).toHaveCountGreaterThan(0);
+    await expect(categoryProducts).toHaveCountGreaterThan(1);
 
     // Filter phones under 650 dollars
     const products = await page.$$eval('.card-block', (products) => {
